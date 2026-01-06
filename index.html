@@ -1,0 +1,508 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  ArrowRight, 
+  Store, 
+  Megaphone, 
+  TrendingUp, 
+  ShieldCheck, 
+  Zap, 
+  Smartphone,
+  CheckCircle2,
+  Menu,
+  X,
+  Upload,
+  Clock,
+  Layout,
+  MousePointer2
+} from 'lucide-react';
+
+// --- Shared Components ---
+
+const Navbar = ({ onNavigate, scrolled, mobileMenuOpen, setMobileMenuOpen, activePage }) => (
+  <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'py-4 bg-black/60 backdrop-blur-xl border-b border-white/5' : 'py-8 bg-transparent'}`}>
+    <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+      <div 
+        className="flex items-center gap-2 group cursor-pointer" 
+        onClick={() => onNavigate('home')}
+      >
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <Zap size={18} className="text-white fill-current" />
+        </div>
+        <span className="text-xl font-bold tracking-tight">Lumina</span>
+      </div>
+
+      {/* Desktop Nav */}
+      <div className="hidden md:flex items-center gap-8">
+        <button 
+          onClick={() => onNavigate('home')} 
+          className={`text-sm font-medium transition-colors ${activePage === 'home' ? 'text-white' : 'text-gray-300 hover:text-white'}`}
+        >
+          For Venues
+        </button>
+        <button 
+          onClick={() => onNavigate('advertise')} 
+          className={`text-sm font-medium transition-colors ${activePage === 'advertise' ? 'text-white' : 'text-gray-300 hover:text-white'}`}
+        >
+          For Advertisers
+        </button>
+        <button className="px-5 py-2.5 rounded-full bg-white text-black text-sm font-bold hover:bg-gray-200 transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-white/10">
+          Get Started
+        </button>
+      </div>
+
+      {/* Mobile Menu Toggle */}
+      <button 
+        className="md:hidden text-gray-300 hover:text-white"
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+      >
+        {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+    </div>
+
+    {/* Mobile Nav Dropdown */}
+    {mobileMenuOpen && (
+      <div className="md:hidden absolute top-full left-0 w-full bg-black/95 backdrop-blur-xl border-b border-white/10 p-6 flex flex-col gap-4 animate-fade-in-down">
+        <button className="text-lg font-medium text-gray-300 text-left" onClick={() => { onNavigate('home'); setMobileMenuOpen(false); }}>For Venues</button>
+        <button className="text-lg font-medium text-gray-300 text-left" onClick={() => { onNavigate('advertise'); setMobileMenuOpen(false); }}>For Advertisers</button>
+        <button className="w-full py-3 rounded-xl bg-indigo-600 text-white font-bold">Get Started</button>
+      </div>
+    )}
+  </nav>
+);
+
+const Footer = () => (
+  <footer className="py-12 border-t border-white/10 bg-black text-gray-500 text-sm mt-auto">
+    <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="flex items-center gap-2">
+        <div className="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center">
+          <Zap size={14} className="text-white fill-current" />
+        </div>
+        <span className="font-bold text-white">Lumina</span>
+      </div>
+      <div className="flex gap-8">
+        <a href="#" className="hover:text-white transition-colors">Privacy</a>
+        <a href="#" className="hover:text-white transition-colors">Terms</a>
+        <a href="#" className="hover:text-white transition-colors">Contact</a>
+      </div>
+      <div>
+        &copy; 2026 Lumina Display Networks.
+      </div>
+    </div>
+  </footer>
+);
+
+// --- Home Page Component ---
+
+const HomePage = ({ onNavigate }) => (
+  <div className="animate-fade-in-up">
+    {/* Hero Section */}
+    <section className="relative pt-40 pb-20 px-6">
+      <div className="max-w-7xl mx-auto text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8">
+          <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+          <span className="text-xs font-medium text-gray-300 tracking-wide uppercase">Next Gen DOOH Network</span>
+        </div>
+        
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
+          Turn your window <br />
+          into <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-blue-400">revenue.</span>
+        </h1>
+        
+        <p className="max-w-2xl mx-auto text-lg md:text-xl text-gray-400 leading-relaxed mb-12">
+          Lumina transforms static glass into high-yield digital assets. 
+          We install ultra-bright commercial displays in prime storefronts. 
+          Venues get paid. Brands get seen.
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <button className="w-full sm:w-auto px-8 py-4 rounded-full bg-white text-black font-bold text-lg hover:bg-gray-200 transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-white/10 flex items-center justify-center gap-2">
+            <Store size={20} />
+            I Have a Window
+          </button>
+          <button 
+            onClick={() => onNavigate('advertise')}
+            className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/10 border border-white/10 backdrop-blur-md text-white font-bold text-lg hover:bg-white/20 transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+          >
+            <Megaphone size={20} />
+            I Want to Advertise
+          </button>
+        </div>
+      </div>
+
+      {/* Hero Visual - Abstract Screen Representation */}
+      <div className="mt-20 max-w-5xl mx-auto relative">
+        <div className="aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-indigo-500/20 relative group">
+           <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent z-10 pointer-events-none"></div>
+           <div className="absolute inset-0 bg-gray-900 flex items-center justify-center overflow-hidden">
+              <div className="absolute inset-0 opacity-50 bg-[url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80')] bg-cover bg-center transition-transform duration-[20s] ease-linear transform group-hover:scale-110"></div>
+              <div className="relative z-10 text-center p-8 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10">
+                <h3 className="text-3xl font-bold text-white mb-2">Your Ad Here</h3>
+                <p className="text-gray-300">Reaching 5,000+ locals daily</p>
+              </div>
+           </div>
+           <div className="absolute bottom-6 left-6 flex gap-2">
+              <div className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-xs font-mono text-green-400 flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                LIVE • 3,500 NITS
+              </div>
+           </div>
+        </div>
+      </div>
+    </section>
+
+    {/* Bento Grid Section - Why Us */}
+    <section className="py-24 px-6 relative z-10">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(250px,auto)]">
+          <div className="md:col-span-2 p-8 rounded-[2rem] bg-gray-900/40 border border-white/10 backdrop-blur-md hover:bg-gray-800/40 transition-colors group">
+            <div className="h-full flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Zap className="text-indigo-400" size={24} />
+                </div>
+                <h3 className="text-3xl font-bold mb-4">Sun-Readable Brightness</h3>
+                <p className="text-gray-400 text-lg leading-relaxed max-w-lg">
+                  We don't use standard TVs. Our industrial 3,500-nit displays cut through direct sunlight, ensuring your message is crisp and visible even on the brightest summer days.
+                </p>
+              </div>
+              <div className="mt-8 flex gap-4">
+                <div className="flex-1 h-2 rounded-full bg-gray-700 overflow-hidden">
+                  <div className="h-full w-[30%] bg-gray-500"></div> 
+                </div>
+                <div className="flex-1 h-2 rounded-full bg-gray-700 overflow-hidden">
+                   <div className="h-full w-full bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
+                </div>
+              </div>
+              <div className="flex justify-between text-xs text-gray-500 mt-2 font-mono">
+                 <span>Standard TV (300 nits)</span>
+                 <span className="text-indigo-400">Lumina (3500 nits)</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-8 rounded-[2rem] bg-gradient-to-b from-gray-800/40 to-gray-900/40 border border-white/10 backdrop-blur-md hover:border-indigo-500/30 transition-all group">
+            <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <TrendingUp className="text-green-400" size={24} />
+            </div>
+            <h3 className="text-2xl font-bold mb-2">Passive Revenue</h3>
+            <p className="text-gray-400 mb-6">Host a screen and earn a percentage of all ad sales. Zero effort required.</p>
+            <div className="text-4xl font-bold text-white tracking-tight">15-30%</div>
+            <div className="text-sm text-gray-500">Revenue Share</div>
+          </div>
+
+          <div className="p-8 rounded-[2rem] bg-gray-900/40 border border-white/10 backdrop-blur-md hover:bg-gray-800/40 transition-colors">
+             <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-6">
+              <Smartphone className="text-blue-400" size={24} />
+            </div>
+            <h3 className="text-2xl font-bold mb-2">Hyper-Local</h3>
+            <p className="text-gray-400">Forget banner ads. Target customers physically standing in front of your local competitors.</p>
+          </div>
+
+          <div className="md:col-span-2 p-8 rounded-[2rem] bg-gray-900/40 border border-white/10 backdrop-blur-md hover:bg-gray-800/40 transition-colors flex flex-col md:flex-row items-center gap-8">
+             <div className="flex-1">
+               <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-6">
+                <ShieldCheck className="text-purple-400" size={24} />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">We Handle Everything</h3>
+              <ul className="space-y-3">
+                {['Professional Installation', 'Content Management', 'Hardware Maintenance', 'Electricity Reimbursement'].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-gray-300">
+                    <CheckCircle2 size={18} className="text-purple-400" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+             </div>
+             <div className="w-full md:w-1/3 aspect-square rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/5 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-5xl mb-2">🤝</div>
+                  <div className="text-sm font-medium text-white">Full Service</div>
+                </div>
+             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+);
+
+// --- Advertiser Page Component ---
+
+const AdvertisePage = () => (
+  <div className="animate-fade-in-up">
+    {/* Header */}
+    <section className="pt-40 pb-16 px-6 text-center">
+      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 backdrop-blur-md mb-8">
+        <span className="text-xs font-medium text-indigo-300 tracking-wide uppercase">Hyper-Local Marketing</span>
+      </div>
+      <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400">
+        Be seen where it <br/>
+        <span className="text-white">actually matters.</span>
+      </h1>
+      <p className="max-w-2xl mx-auto text-xl text-gray-400 leading-relaxed">
+        Stop wasting budget on scroll-past social ads. Put your brand physically in front of thousands of local shoppers every single day.
+      </p>
+    </section>
+
+    {/* Pricing Cards */}
+    <section className="py-16 px-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          
+          {/* Starter Tier */}
+          <div className="relative p-8 rounded-3xl bg-gray-900/40 border border-white/10 backdrop-blur-md flex flex-col hover:border-white/20 transition-all group">
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-300 mb-2">Local Spark</h3>
+              <div className="flex items-baseline gap-1">
+                <span className="text-4xl font-bold text-white">$99</span>
+                <span className="text-gray-500">/mo</span>
+              </div>
+              <p className="text-sm text-gray-500 mt-2">Perfect for brand awareness.</p>
+            </div>
+            <ul className="space-y-4 mb-8 flex-1">
+              {[
+                '1 Premium Location',
+                '100 Plays Per Day',
+                '15-Second Spot Length',
+                'Monthly Performance Report'
+              ].map((item, i) => (
+                <li key={i} className="flex items-center gap-3 text-gray-300 text-sm">
+                  <CheckCircle2 size={16} className="text-gray-500" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <button className="w-full py-4 rounded-xl border border-white/20 hover:bg-white hover:text-black transition-all font-bold text-sm">
+              Select Package
+            </button>
+          </div>
+
+          {/* Recommended Tier */}
+          <div className="relative p-8 rounded-3xl bg-gray-800/60 border border-indigo-500/50 backdrop-blur-md flex flex-col shadow-2xl shadow-indigo-500/10 transform md:-translate-y-4">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 rounded-full bg-indigo-600 text-xs font-bold uppercase tracking-wider text-white border border-indigo-400">
+              Most Popular
+            </div>
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-indigo-300 mb-2">Town Presence</h3>
+              <div className="flex items-baseline gap-1">
+                <span className="text-5xl font-bold text-white">$249</span>
+                <span className="text-gray-500">/mo</span>
+              </div>
+              <p className="text-sm text-gray-400 mt-2">High frequency for maximum recall.</p>
+            </div>
+            <ul className="space-y-4 mb-8 flex-1">
+              {[
+                'Up to 2 Locations',
+                '400 Plays Per Day',
+                'Prime Time Priority (8am-8pm)',
+                '15-Second Spot Length',
+                'Weekly Performance Report'
+              ].map((item, i) => (
+                <li key={i} className="flex items-center gap-3 text-white text-sm">
+                  <CheckCircle2 size={16} className="text-indigo-400" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <button className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition-all font-bold text-sm text-white shadow-lg shadow-indigo-500/25">
+              Select Package
+            </button>
+          </div>
+
+          {/* Pro Tier */}
+          <div className="relative p-8 rounded-3xl bg-gray-900/40 border border-white/10 backdrop-blur-md flex flex-col hover:border-white/20 transition-all">
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-purple-300 mb-2">Domination</h3>
+              <div className="flex items-baseline gap-1">
+                <span className="text-4xl font-bold text-white">$499</span>
+                <span className="text-gray-500">/mo</span>
+              </div>
+              <p className="text-sm text-gray-500 mt-2">Total category exclusivity.</p>
+            </div>
+            <ul className="space-y-4 mb-8 flex-1">
+              {[
+                'All Available Locations',
+                '1,000+ Plays Per Day',
+                'Category Exclusivity (No Rivals)',
+                'Free Ad Design Service',
+                'Real-time Analytics Dashboard'
+              ].map((item, i) => (
+                <li key={i} className="flex items-center gap-3 text-gray-300 text-sm">
+                  <CheckCircle2 size={16} className="text-purple-500" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <button className="w-full py-4 rounded-xl border border-white/20 hover:bg-white hover:text-black transition-all font-bold text-sm">
+              Select Package
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    {/* Requirements Section */}
+    <section className="py-24 px-6 border-t border-white/5 bg-black/50">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">What we need to go live.</h2>
+            <p className="text-gray-400 mb-8 text-lg">
+              Getting your ad on the street is easier than Facebook Ads Manager. 
+              Just send us the files, or let our design team handle it for you.
+            </p>
+            
+            <div className="space-y-6">
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center shrink-0">
+                  <Layout size={20} className="text-white" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white mb-1">Dimensions</h4>
+                  <p className="text-sm text-gray-400">Vertical 9:16 Aspect Ratio (1080x1920px). This fits our portrait windows perfectly.</p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center shrink-0">
+                  <Clock size={20} className="text-white" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white mb-1">Duration</h4>
+                  <p className="text-sm text-gray-400">Video spots should be exactly 15 seconds. Static images display for 15 seconds.</p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center shrink-0">
+                  <MousePointer2 size={20} className="text-white" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white mb-1">Keep it Simple</h4>
+                  <p className="text-sm text-gray-400">Passersby have 3 seconds to notice you. Use large text, high contrast, and a single clear Call to Action.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10 p-6 rounded-2xl bg-indigo-900/20 border border-indigo-500/20">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-1 rounded bg-indigo-500 text-white"><CheckCircle2 size={12}/></div>
+                <span className="font-bold text-indigo-300">Don't have an ad?</span>
+              </div>
+              <p className="text-sm text-gray-400">Our creative team can design a motion-graphic ad for your brand for a one-time fee of <strong>$150</strong>.</p>
+            </div>
+          </div>
+
+          <div className="relative">
+             {/* Abstract Representation of Asset Upload */}
+             <div className="aspect-[9/16] max-w-xs mx-auto bg-gray-900 rounded-3xl border border-white/10 relative overflow-hidden shadow-2xl">
+                <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-px bg-gray-800/50 opacity-20">
+                  <div></div><div></div><div></div><div></div>
+                </div>
+                
+                {/* Upload UI Element */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+                  <div className="w-20 h-20 rounded-full bg-gray-800 border border-dashed border-gray-600 flex items-center justify-center mb-6 animate-pulse">
+                    <Upload size={32} className="text-gray-400" />
+                  </div>
+                  <h3 className="text-white font-bold text-xl mb-2">Drop Artwork Here</h3>
+                  <p className="text-xs text-gray-500 mb-6">MP4, JPG, PNG accepted<br/>Max 50MB</p>
+                  <div className="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                    <div className="bg-indigo-500 h-full w-2/3"></div>
+                  </div>
+                </div>
+
+                {/* Simulated Success Notification */}
+                <div className="absolute top-6 left-6 right-6 p-3 bg-green-500/10 border border-green-500/20 backdrop-blur-md rounded-xl flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  <span className="text-xs font-mono text-green-400">Spec Check Passed</span>
+                </div>
+             </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    {/* Final CTA */}
+    <section className="py-20 text-center">
+       <h2 className="text-3xl font-bold mb-8">Start your campaign today.</h2>
+       <button className="px-10 py-5 rounded-full bg-white text-black font-bold text-lg hover:bg-gray-200 transition-all shadow-xl shadow-white/10">
+          Book a Consultation
+       </button>
+    </section>
+  </div>
+);
+
+// --- Main App Component ---
+
+const App = () => {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activePage, setActivePage] = useState('home'); // 'home' | 'advertise'
+
+  // Handle scroll effects for navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top on page change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activePage]);
+
+  return (
+    <div className="min-h-screen bg-black text-white selection:bg-indigo-500 selection:text-white font-sans overflow-x-hidden flex flex-col">
+      
+      {/* Background Ambient Glows */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-blue-600/10 rounded-full blur-[120px]"></div>
+      </div>
+
+      <Navbar 
+        onNavigate={setActivePage} 
+        scrolled={scrolled} 
+        mobileMenuOpen={mobileMenuOpen} 
+        setMobileMenuOpen={setMobileMenuOpen}
+        activePage={activePage}
+      />
+
+      <main className="flex-grow">
+        {activePage === 'home' ? (
+          <HomePage onNavigate={setActivePage} />
+        ) : (
+          <AdvertisePage />
+        )}
+      </main>
+
+      <Footer />
+      
+      <style jsx global>{`
+        @keyframes fade-in-up {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fade-in-down {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .animate-fade-in-down {
+          animation: fade-in-down 0.3s ease-out forwards;
+        }
+        .animate-pulse-slow {
+          animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default App;
