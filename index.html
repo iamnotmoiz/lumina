@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ArrowRight, 
   Store, 
@@ -13,46 +13,80 @@ import {
   Upload,
   Clock,
   Layout,
-  MousePointer2
+  MousePointer2,
+  ChevronRight
 } from 'lucide-react';
+
+// --- Utility Components ---
+
+const RevealOnScroll = ({ children, delay = 0, className = "" }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: '50px' }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-1000 transform ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+      } ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+};
 
 // --- Shared Components ---
 
 const Navbar = ({ onNavigate, scrolled, mobileMenuOpen, setMobileMenuOpen, activePage }) => (
-  <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'py-4 bg-black/60 backdrop-blur-xl border-b border-white/5' : 'py-8 bg-transparent'}`}>
+  <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'py-4 bg-black/80 backdrop-blur-xl border-b border-white/5 shadow-2xl shadow-black/50' : 'py-6 md:py-8 bg-transparent'}`}>
     <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
       <div 
         className="flex items-center gap-2 group cursor-pointer" 
         onClick={() => onNavigate('home')}
       >
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-all duration-500 group-hover:scale-110">
           <Zap size={18} className="text-white fill-current" />
         </div>
-        <span className="text-xl font-bold tracking-tight">Lumina</span>
+        <span className="text-xl font-bold tracking-tight text-white">Lumina</span>
       </div>
 
       {/* Desktop Nav */}
       <div className="hidden md:flex items-center gap-8">
         <button 
           onClick={() => onNavigate('home')} 
-          className={`text-sm font-medium transition-colors ${activePage === 'home' ? 'text-white' : 'text-gray-300 hover:text-white'}`}
+          className={`text-sm font-medium transition-all duration-300 hover:scale-105 ${activePage === 'home' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
         >
           For Venues
         </button>
         <button 
           onClick={() => onNavigate('advertise')} 
-          className={`text-sm font-medium transition-colors ${activePage === 'advertise' ? 'text-white' : 'text-gray-300 hover:text-white'}`}
+          className={`text-sm font-medium transition-all duration-300 hover:scale-105 ${activePage === 'advertise' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
         >
           For Advertisers
         </button>
-        <button className="px-5 py-2.5 rounded-full bg-white text-black text-sm font-bold hover:bg-gray-200 transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-white/10">
+        <button className="px-6 py-2.5 rounded-full bg-white text-black text-sm font-bold hover:bg-gray-200 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)]">
           Get Started
         </button>
       </div>
 
       {/* Mobile Menu Toggle */}
       <button 
-        className="md:hidden text-gray-300 hover:text-white"
+        className="md:hidden text-white p-2"
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
       >
         {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -61,17 +95,17 @@ const Navbar = ({ onNavigate, scrolled, mobileMenuOpen, setMobileMenuOpen, activ
 
     {/* Mobile Nav Dropdown */}
     {mobileMenuOpen && (
-      <div className="md:hidden absolute top-full left-0 w-full bg-black/95 backdrop-blur-xl border-b border-white/10 p-6 flex flex-col gap-4 animate-fade-in-down">
-        <button className="text-lg font-medium text-gray-300 text-left" onClick={() => { onNavigate('home'); setMobileMenuOpen(false); }}>For Venues</button>
-        <button className="text-lg font-medium text-gray-300 text-left" onClick={() => { onNavigate('advertise'); setMobileMenuOpen(false); }}>For Advertisers</button>
-        <button className="w-full py-3 rounded-xl bg-indigo-600 text-white font-bold">Get Started</button>
+      <div className="md:hidden absolute top-full left-0 w-full h-screen bg-black/95 backdrop-blur-xl p-8 flex flex-col gap-6 animate-fade-in-down z-50">
+        <button className="text-2xl font-bold text-white text-left py-4 border-b border-white/10" onClick={() => { onNavigate('home'); setMobileMenuOpen(false); }}>For Venues</button>
+        <button className="text-2xl font-bold text-white text-left py-4 border-b border-white/10" onClick={() => { onNavigate('advertise'); setMobileMenuOpen(false); }}>For Advertisers</button>
+        <button className="w-full py-4 mt-4 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold text-lg shadow-lg">Get Started</button>
       </div>
     )}
   </nav>
 );
 
 const Footer = () => (
-  <footer className="py-12 border-t border-white/10 bg-black text-gray-500 text-sm mt-auto">
+  <footer className="py-12 border-t border-white/10 bg-black text-gray-500 text-sm mt-auto relative z-10">
     <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center">
@@ -79,12 +113,12 @@ const Footer = () => (
         </div>
         <span className="font-bold text-white">Lumina</span>
       </div>
-      <div className="flex gap-8">
+      <div className="flex flex-wrap justify-center gap-8">
         <a href="#" className="hover:text-white transition-colors">Privacy</a>
         <a href="#" className="hover:text-white transition-colors">Terms</a>
         <a href="#" className="hover:text-white transition-colors">Contact</a>
       </div>
-      <div>
+      <div className="text-center md:text-right">
         &copy; 2026 Lumina Display Networks.
       </div>
     </div>
@@ -94,131 +128,172 @@ const Footer = () => (
 // --- Home Page Component ---
 
 const HomePage = ({ onNavigate }) => (
-  <div className="animate-fade-in-up">
+  <div className="overflow-hidden">
     {/* Hero Section */}
-    <section className="relative pt-40 pb-20 px-6">
-      <div className="max-w-7xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8">
-          <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-          <span className="text-xs font-medium text-gray-300 tracking-wide uppercase">Next Gen DOOH Network</span>
-        </div>
+    <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6">
+      <div className="max-w-7xl mx-auto text-center relative z-10">
+        <RevealOnScroll>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 hover:bg-white/10 transition-colors cursor-default">
+            <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+            <span className="text-xs font-medium text-gray-300 tracking-wide uppercase">Next Gen DOOH Network</span>
+          </div>
+        </RevealOnScroll>
         
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
-          Turn your window <br />
-          into <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-blue-400">revenue.</span>
-        </h1>
+        <RevealOnScroll delay={100}>
+          <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/40 leading-[1.1]">
+            Turn your window <br className="hidden md:block"/>
+            into <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-blue-500 animate-gradient-x">revenue.</span>
+          </h1>
+        </RevealOnScroll>
         
-        <p className="max-w-2xl mx-auto text-lg md:text-xl text-gray-400 leading-relaxed mb-12">
-          Lumina transforms static glass into high-yield digital assets. 
-          We install ultra-bright commercial displays in prime storefronts. 
-          Venues get paid. Brands get seen.
-        </p>
+        <RevealOnScroll delay={200}>
+          <p className="max-w-2xl mx-auto text-lg md:text-xl text-gray-400 leading-relaxed mb-12 px-4">
+            Lumina transforms static glass into high-yield digital assets. 
+            We install ultra-bright commercial displays in prime storefronts. 
+            Venues get paid. Brands get seen.
+          </p>
+        </RevealOnScroll>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button className="w-full sm:w-auto px-8 py-4 rounded-full bg-white text-black font-bold text-lg hover:bg-gray-200 transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-white/10 flex items-center justify-center gap-2">
-            <Store size={20} />
-            I Have a Window
-          </button>
-          <button 
-            onClick={() => onNavigate('advertise')}
-            className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/10 border border-white/10 backdrop-blur-md text-white font-bold text-lg hover:bg-white/20 transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
-          >
-            <Megaphone size={20} />
-            I Want to Advertise
-          </button>
-        </div>
+        <RevealOnScroll delay={300}>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4">
+            <button className="w-full sm:w-auto px-8 py-4 rounded-full bg-white text-black font-bold text-lg hover:bg-gray-200 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.2)] hover:shadow-[0_0_60px_rgba(255,255,255,0.4)] flex items-center justify-center gap-2">
+              <Store size={20} />
+              I Have a Window
+            </button>
+            <button 
+              onClick={() => onNavigate('advertise')}
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-white font-bold text-lg hover:bg-white/10 hover:border-white/20 transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 group"
+            >
+              <Megaphone size={20} className="group-hover:rotate-12 transition-transform" />
+              I Want to Advertise
+            </button>
+          </div>
+        </RevealOnScroll>
       </div>
 
       {/* Hero Visual - Abstract Screen Representation */}
-      <div className="mt-20 max-w-5xl mx-auto relative">
-        <div className="aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-indigo-500/20 relative group">
-           <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent z-10 pointer-events-none"></div>
+      <RevealOnScroll delay={400} className="mt-16 md:mt-24 max-w-5xl mx-auto relative px-2 md:px-0">
+        <div className="aspect-video rounded-2xl md:rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl shadow-indigo-500/20 relative group animate-float bg-gray-900">
+           {/* Glare effect */}
+           <div className="absolute -inset-[50%] bg-gradient-to-tr from-transparent via-white/5 to-transparent z-20 pointer-events-none rotate-45 transform translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-[2s]"></div>
+           
            <div className="absolute inset-0 bg-gray-900 flex items-center justify-center overflow-hidden">
-              <div className="absolute inset-0 opacity-50 bg-[url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80')] bg-cover bg-center transition-transform duration-[20s] ease-linear transform group-hover:scale-110"></div>
-              <div className="relative z-10 text-center p-8 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10">
-                <h3 className="text-3xl font-bold text-white mb-2">Your Ad Here</h3>
-                <p className="text-gray-300">Reaching 5,000+ locals daily</p>
+              <div className="absolute inset-0 opacity-60 bg-[url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80')] bg-cover bg-center transition-transform duration-[20s] ease-linear transform scale-100 group-hover:scale-110"></div>
+              
+              {/* Screen Content UI */}
+              <div className="relative z-10 text-center p-8 bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl transform transition-transform duration-500 hover:scale-105">
+                <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 drop-shadow-lg">Your Ad Here</h3>
+                <p className="text-gray-200 drop-shadow-md font-medium">Reaching 5,000+ locals daily</p>
+                <div className="mt-4 flex justify-center">
+                  <div className="w-12 h-1 bg-indigo-500 rounded-full animate-pulse"></div>
+                </div>
               </div>
            </div>
-           <div className="absolute bottom-6 left-6 flex gap-2">
-              <div className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-xs font-mono text-green-400 flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+
+           {/* Live Badge */}
+           <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 flex gap-2 z-20">
+              <div className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-xs font-mono text-green-400 flex items-center gap-2 shadow-lg">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500 absolute"></div>
                 LIVE • 3,500 NITS
               </div>
            </div>
         </div>
-      </div>
+        
+        {/* Decorative elements behind screen */}
+        <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[90%] bg-indigo-500/10 rounded-[100%] blur-[80px] animate-pulse-slow"></div>
+      </RevealOnScroll>
     </section>
 
     {/* Bento Grid Section - Why Us */}
     <section className="py-24 px-6 relative z-10">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(250px,auto)]">
-          <div className="md:col-span-2 p-8 rounded-[2rem] bg-gray-900/40 border border-white/10 backdrop-blur-md hover:bg-gray-800/40 transition-colors group">
-            <div className="h-full flex flex-col justify-between">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Zap className="text-indigo-400" size={24} />
+          
+          <div className="md:col-span-2 group">
+            <RevealOnScroll className="h-full">
+              <div className="h-full p-8 rounded-[2rem] bg-gray-900/40 border border-white/10 backdrop-blur-md hover:bg-gray-900/60 hover:border-white/20 transition-all duration-500 flex flex-col justify-between overflow-hidden relative">
+                <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+                  <div className="w-64 h-64 bg-indigo-500/20 rounded-full blur-[60px] -mr-32 -mt-32"></div>
                 </div>
-                <h3 className="text-3xl font-bold mb-4">Sun-Readable Brightness</h3>
-                <p className="text-gray-400 text-lg leading-relaxed max-w-lg">
-                  We don't use standard TVs. Our industrial 3,500-nit displays cut through direct sunlight, ensuring your message is crisp and visible even on the brightest summer days.
-                </p>
-              </div>
-              <div className="mt-8 flex gap-4">
-                <div className="flex-1 h-2 rounded-full bg-gray-700 overflow-hidden">
-                  <div className="h-full w-[30%] bg-gray-500"></div> 
+                
+                <div className="relative z-10">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-blue-500/20 border border-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+                    <Zap className="text-indigo-400" size={28} />
+                  </div>
+                  <h3 className="text-3xl font-bold mb-4 text-white">Sun-Readable Brightness</h3>
+                  <p className="text-gray-400 text-lg leading-relaxed max-w-lg">
+                    We don't use standard TVs. Our industrial 3,500-nit displays cut through direct sunlight, ensuring your message is crisp and visible even on the brightest summer days.
+                  </p>
                 </div>
-                <div className="flex-1 h-2 rounded-full bg-gray-700 overflow-hidden">
-                   <div className="h-full w-full bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
+                <div className="mt-8 flex gap-4 relative z-10">
+                  <div className="flex-1 h-3 rounded-full bg-gray-800 overflow-hidden border border-white/5">
+                    <div className="h-full w-[30%] bg-gray-600"></div> 
+                  </div>
+                  <div className="flex-1 h-3 rounded-full bg-gray-800 overflow-hidden border border-white/5">
+                     <div className="h-full w-full bg-gradient-to-r from-indigo-500 to-blue-400 shadow-[0_0_20px_rgba(99,102,241,0.6)] animate-pulse-slow"></div>
+                  </div>
+                </div>
+                <div className="flex justify-between text-xs text-gray-500 mt-2 font-mono uppercase tracking-wider relative z-10">
+                   <span>Standard TV (300 nits)</span>
+                   <span className="text-indigo-400 font-bold">Lumina (3500 nits)</span>
                 </div>
               </div>
-              <div className="flex justify-between text-xs text-gray-500 mt-2 font-mono">
-                 <span>Standard TV (300 nits)</span>
-                 <span className="text-indigo-400">Lumina (3500 nits)</span>
-              </div>
-            </div>
+            </RevealOnScroll>
           </div>
 
-          <div className="p-8 rounded-[2rem] bg-gradient-to-b from-gray-800/40 to-gray-900/40 border border-white/10 backdrop-blur-md hover:border-indigo-500/30 transition-all group">
-            <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <TrendingUp className="text-green-400" size={24} />
-            </div>
-            <h3 className="text-2xl font-bold mb-2">Passive Revenue</h3>
-            <p className="text-gray-400 mb-6">Host a screen and earn a percentage of all ad sales. Zero effort required.</p>
-            <div className="text-4xl font-bold text-white tracking-tight">15-30%</div>
-            <div className="text-sm text-gray-500">Revenue Share</div>
-          </div>
-
-          <div className="p-8 rounded-[2rem] bg-gray-900/40 border border-white/10 backdrop-blur-md hover:bg-gray-800/40 transition-colors">
-             <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-6">
-              <Smartphone className="text-blue-400" size={24} />
-            </div>
-            <h3 className="text-2xl font-bold mb-2">Hyper-Local</h3>
-            <p className="text-gray-400">Forget banner ads. Target customers physically standing in front of your local competitors.</p>
-          </div>
-
-          <div className="md:col-span-2 p-8 rounded-[2rem] bg-gray-900/40 border border-white/10 backdrop-blur-md hover:bg-gray-800/40 transition-colors flex flex-col md:flex-row items-center gap-8">
-             <div className="flex-1">
-               <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-6">
-                <ShieldCheck className="text-purple-400" size={24} />
-              </div>
-              <h3 className="text-2xl font-bold mb-4">We Handle Everything</h3>
-              <ul className="space-y-3">
-                {['Professional Installation', 'Content Management', 'Hardware Maintenance', 'Electricity Reimbursement'].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-gray-300">
-                    <CheckCircle2 size={18} className="text-purple-400" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-             </div>
-             <div className="w-full md:w-1/3 aspect-square rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/5 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-5xl mb-2">🤝</div>
-                  <div className="text-sm font-medium text-white">Full Service</div>
+          <div className="group">
+            <RevealOnScroll delay={100} className="h-full">
+              <div className="h-full p-8 rounded-[2rem] bg-gradient-to-b from-gray-900/60 to-black border border-white/10 backdrop-blur-md hover:border-green-500/30 transition-all duration-500 group-hover:-translate-y-2">
+                <div className="w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+                  <TrendingUp className="text-green-400" size={28} />
                 </div>
-             </div>
+                <h3 className="text-2xl font-bold mb-2 text-white">Passive Revenue</h3>
+                <p className="text-gray-400 mb-6 text-sm">Host a screen and earn a percentage of all ad sales.</p>
+                <div className="text-5xl font-bold text-white tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-green-400">15-30%</div>
+                <div className="text-sm text-green-500 font-medium mt-1">Revenue Share</div>
+              </div>
+            </RevealOnScroll>
+          </div>
+
+          <div className="group">
+            <RevealOnScroll delay={200} className="h-full">
+              <div className="h-full p-8 rounded-[2rem] bg-gray-900/40 border border-white/10 backdrop-blur-md hover:bg-gray-900/60 transition-colors hover:border-blue-400/30 group-hover:-translate-y-2 duration-500">
+                 <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 group-hover:rotate-6 transition-transform">
+                  <Smartphone className="text-blue-400" size={28} />
+                </div>
+                <h3 className="text-2xl font-bold mb-2 text-white">Hyper-Local</h3>
+                <p className="text-gray-400">Forget banner ads. Target customers physically standing in front of your local competitors.</p>
+              </div>
+            </RevealOnScroll>
+          </div>
+
+          <div className="md:col-span-2 group">
+            <RevealOnScroll delay={300} className="h-full">
+              <div className="h-full p-8 rounded-[2rem] bg-gray-900/40 border border-white/10 backdrop-blur-md hover:bg-gray-900/60 hover:border-purple-500/30 transition-all duration-500 flex flex-col md:flex-row items-center gap-8">
+                 <div className="flex-1">
+                   <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-6">
+                    <ShieldCheck className="text-purple-400" size={28} />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4 text-white">We Handle Everything</h3>
+                  <ul className="space-y-4">
+                    {['Professional Installation', 'Content Management', 'Hardware Maintenance', 'Electricity Reimbursement'].map((item, i) => (
+                      <li key={i} className="flex items-center gap-3 text-gray-300 group-hover:text-white transition-colors">
+                        <CheckCircle2 size={18} className="text-purple-400" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                 </div>
+                 <div className="w-full md:w-1/3 aspect-square rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/5 flex items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                    <div className="text-center relative z-10 transform group-hover:scale-110 transition-transform duration-500">
+                      <div className="text-6xl mb-4">🤝</div>
+                      <div className="text-sm font-bold text-white uppercase tracking-widest">Full Service</div>
+                    </div>
+                 </div>
+              </div>
+            </RevealOnScroll>
           </div>
         </div>
       </div>
@@ -229,19 +304,27 @@ const HomePage = ({ onNavigate }) => (
 // --- Advertiser Page Component ---
 
 const AdvertisePage = () => (
-  <div className="animate-fade-in-up">
+  <div className="overflow-hidden">
     {/* Header */}
-    <section className="pt-40 pb-16 px-6 text-center">
-      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 backdrop-blur-md mb-8">
-        <span className="text-xs font-medium text-indigo-300 tracking-wide uppercase">Hyper-Local Marketing</span>
-      </div>
-      <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400">
-        Be seen where it <br/>
-        <span className="text-white">actually matters.</span>
-      </h1>
-      <p className="max-w-2xl mx-auto text-xl text-gray-400 leading-relaxed">
-        Stop wasting budget on scroll-past social ads. Put your brand physically in front of thousands of local shoppers every single day.
-      </p>
+    <section className="pt-32 pb-16 md:pt-40 px-6 text-center">
+      <RevealOnScroll>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 backdrop-blur-md mb-8">
+          <span className="text-xs font-medium text-indigo-300 tracking-wide uppercase">Hyper-Local Marketing</span>
+        </div>
+      </RevealOnScroll>
+      
+      <RevealOnScroll delay={100}>
+        <h1 className="text-4xl md:text-7xl font-bold tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-500 leading-tight">
+          Be seen where it <br/>
+          <span className="text-white">actually matters.</span>
+        </h1>
+      </RevealOnScroll>
+      
+      <RevealOnScroll delay={200}>
+        <p className="max-w-2xl mx-auto text-lg md:text-xl text-gray-400 leading-relaxed px-4">
+          Stop wasting budget on scroll-past social ads. Put your brand physically in front of thousands of local shoppers every single day.
+        </p>
+      </RevealOnScroll>
     </section>
 
     {/* Pricing Cards */}
@@ -250,186 +333,187 @@ const AdvertisePage = () => (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           
           {/* Starter Tier */}
-          <div className="relative p-8 rounded-3xl bg-gray-900/40 border border-white/10 backdrop-blur-md flex flex-col hover:border-white/20 transition-all group">
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-gray-300 mb-2">Local Spark</h3>
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-white">$99</span>
-                <span className="text-gray-500">/mo</span>
+          <RevealOnScroll delay={300}>
+            <div className="h-full relative p-8 rounded-3xl bg-gray-900/40 border border-white/10 backdrop-blur-md flex flex-col hover:border-white/30 hover:bg-gray-800/50 transition-all duration-300 group">
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-gray-300 mb-2">Local Spark</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-bold text-white">$99</span>
+                  <span className="text-gray-500">/mo</span>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">Perfect for brand awareness.</p>
               </div>
-              <p className="text-sm text-gray-500 mt-2">Perfect for brand awareness.</p>
+              <ul className="space-y-4 mb-8 flex-1">
+                {[
+                  '1 Premium Location',
+                  '100 Plays Per Day',
+                  '15-Second Spot Length',
+                  'Monthly Performance Report'
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-gray-300 text-sm group-hover:text-white transition-colors">
+                    <CheckCircle2 size={16} className="text-gray-500 group-hover:text-gray-300" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <button className="w-full py-4 rounded-xl border border-white/20 hover:bg-white hover:text-black transition-all font-bold text-sm flex items-center justify-center gap-2 group-hover:gap-3">
+                Select Package <ChevronRight size={16}/>
+              </button>
             </div>
-            <ul className="space-y-4 mb-8 flex-1">
-              {[
-                '1 Premium Location',
-                '100 Plays Per Day',
-                '15-Second Spot Length',
-                'Monthly Performance Report'
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-3 text-gray-300 text-sm">
-                  <CheckCircle2 size={16} className="text-gray-500" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <button className="w-full py-4 rounded-xl border border-white/20 hover:bg-white hover:text-black transition-all font-bold text-sm">
-              Select Package
-            </button>
-          </div>
+          </RevealOnScroll>
 
           {/* Recommended Tier */}
-          <div className="relative p-8 rounded-3xl bg-gray-800/60 border border-indigo-500/50 backdrop-blur-md flex flex-col shadow-2xl shadow-indigo-500/10 transform md:-translate-y-4">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 rounded-full bg-indigo-600 text-xs font-bold uppercase tracking-wider text-white border border-indigo-400">
-              Most Popular
-            </div>
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-indigo-300 mb-2">Town Presence</h3>
-              <div className="flex items-baseline gap-1">
-                <span className="text-5xl font-bold text-white">$249</span>
-                <span className="text-gray-500">/mo</span>
+          <RevealOnScroll delay={400} className="md:-translate-y-4">
+            <div className="h-full relative p-8 rounded-3xl bg-gray-800/80 border border-indigo-500/50 backdrop-blur-xl flex flex-col shadow-2xl shadow-indigo-500/20 group hover:shadow-indigo-500/40 transition-all duration-300">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 rounded-full bg-indigo-600 text-xs font-bold uppercase tracking-wider text-white border border-indigo-400 shadow-lg">
+                Most Popular
               </div>
-              <p className="text-sm text-gray-400 mt-2">High frequency for maximum recall.</p>
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-indigo-300 mb-2">Town Presence</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-5xl font-bold text-white">$249</span>
+                  <span className="text-gray-500">/mo</span>
+                </div>
+                <p className="text-sm text-gray-400 mt-2">High frequency for maximum recall.</p>
+              </div>
+              <ul className="space-y-4 mb-8 flex-1">
+                {[
+                  'Up to 2 Locations',
+                  '400 Plays Per Day',
+                  'Prime Time Priority (8am-8pm)',
+                  '15-Second Spot Length',
+                  'Weekly Performance Report'
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-white text-sm">
+                    <CheckCircle2 size={16} className="text-indigo-400" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <button className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition-all font-bold text-sm text-white shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 group-hover:gap-3">
+                Select Package <ChevronRight size={16}/>
+              </button>
             </div>
-            <ul className="space-y-4 mb-8 flex-1">
-              {[
-                'Up to 2 Locations',
-                '400 Plays Per Day',
-                'Prime Time Priority (8am-8pm)',
-                '15-Second Spot Length',
-                'Weekly Performance Report'
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-3 text-white text-sm">
-                  <CheckCircle2 size={16} className="text-indigo-400" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <button className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition-all font-bold text-sm text-white shadow-lg shadow-indigo-500/25">
-              Select Package
-            </button>
-          </div>
+          </RevealOnScroll>
 
           {/* Pro Tier */}
-          <div className="relative p-8 rounded-3xl bg-gray-900/40 border border-white/10 backdrop-blur-md flex flex-col hover:border-white/20 transition-all">
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-purple-300 mb-2">Domination</h3>
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-white">$499</span>
-                <span className="text-gray-500">/mo</span>
+          <RevealOnScroll delay={500}>
+            <div className="h-full relative p-8 rounded-3xl bg-gray-900/40 border border-white/10 backdrop-blur-md flex flex-col hover:border-purple-500/30 hover:bg-gray-800/50 transition-all duration-300 group">
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-purple-300 mb-2">Domination</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-bold text-white">$499</span>
+                  <span className="text-gray-500">/mo</span>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">Total category exclusivity.</p>
               </div>
-              <p className="text-sm text-gray-500 mt-2">Total category exclusivity.</p>
+              <ul className="space-y-4 mb-8 flex-1">
+                {[
+                  'All Available Locations',
+                  '1,000+ Plays Per Day',
+                  'Category Exclusivity (No Rivals)',
+                  'Free Ad Design Service',
+                  'Real-time Analytics Dashboard'
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-gray-300 text-sm group-hover:text-white transition-colors">
+                    <CheckCircle2 size={16} className="text-purple-500" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <button className="w-full py-4 rounded-xl border border-white/20 hover:bg-white hover:text-black transition-all font-bold text-sm flex items-center justify-center gap-2 group-hover:gap-3">
+                Select Package <ChevronRight size={16}/>
+              </button>
             </div>
-            <ul className="space-y-4 mb-8 flex-1">
-              {[
-                'All Available Locations',
-                '1,000+ Plays Per Day',
-                'Category Exclusivity (No Rivals)',
-                'Free Ad Design Service',
-                'Real-time Analytics Dashboard'
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-3 text-gray-300 text-sm">
-                  <CheckCircle2 size={16} className="text-purple-500" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <button className="w-full py-4 rounded-xl border border-white/20 hover:bg-white hover:text-black transition-all font-bold text-sm">
-              Select Package
-            </button>
-          </div>
+          </RevealOnScroll>
 
         </div>
       </div>
     </section>
 
     {/* Requirements Section */}
-    <section className="py-24 px-6 border-t border-white/5 bg-black/50">
+    <section className="py-24 px-6 border-t border-white/5 bg-black/50 relative z-10">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">What we need to go live.</h2>
-            <p className="text-gray-400 mb-8 text-lg">
-              Getting your ad on the street is easier than Facebook Ads Manager. 
-              Just send us the files, or let our design team handle it for you.
-            </p>
-            
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center shrink-0">
-                  <Layout size={20} className="text-white" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-white mb-1">Dimensions</h4>
-                  <p className="text-sm text-gray-400">Vertical 9:16 Aspect Ratio (1080x1920px). This fits our portrait windows perfectly.</p>
-                </div>
+          <RevealOnScroll>
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">What we need to go live.</h2>
+              <p className="text-gray-400 mb-8 text-lg">
+                Getting your ad on the street is easier than Facebook Ads Manager. 
+                Just send us the files, or let our design team handle it for you.
+              </p>
+              
+              <div className="space-y-6">
+                {[
+                  { icon: Layout, title: 'Dimensions', text: 'Vertical 9:16 Aspect Ratio (1080x1920px). This fits our portrait windows perfectly.' },
+                  { icon: Clock, title: 'Duration', text: 'Video spots should be exactly 15 seconds. Static images display for 15 seconds.' },
+                  { icon: MousePointer2, title: 'Keep it Simple', text: 'Passersby have 3 seconds to notice you. Use large text, high contrast, and a single clear Call to Action.' }
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4 group">
+                    <div className="w-12 h-12 rounded-xl bg-gray-800/50 flex items-center justify-center shrink-0 border border-white/5 group-hover:border-indigo-500/50 group-hover:bg-indigo-500/10 transition-all duration-300">
+                      <item.icon size={22} className="text-white group-hover:text-indigo-400 transition-colors" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white mb-1 group-hover:text-indigo-300 transition-colors">{item.title}</h4>
+                      <p className="text-sm text-gray-400">{item.text}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center shrink-0">
-                  <Clock size={20} className="text-white" />
+
+              <div className="mt-10 p-6 rounded-2xl bg-indigo-900/10 border border-indigo-500/20 hover:bg-indigo-900/20 transition-colors">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-1 rounded bg-indigo-500 text-white"><CheckCircle2 size={12}/></div>
+                  <span className="font-bold text-indigo-300">Don't have an ad?</span>
                 </div>
-                <div>
-                  <h4 className="font-bold text-white mb-1">Duration</h4>
-                  <p className="text-sm text-gray-400">Video spots should be exactly 15 seconds. Static images display for 15 seconds.</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center shrink-0">
-                  <MousePointer2 size={20} className="text-white" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-white mb-1">Keep it Simple</h4>
-                  <p className="text-sm text-gray-400">Passersby have 3 seconds to notice you. Use large text, high contrast, and a single clear Call to Action.</p>
-                </div>
+                <p className="text-sm text-gray-400">Our creative team can design a motion-graphic ad for your brand for a one-time fee of <strong>$150</strong>.</p>
               </div>
             </div>
+          </RevealOnScroll>
 
-            <div className="mt-10 p-6 rounded-2xl bg-indigo-900/20 border border-indigo-500/20">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-1 rounded bg-indigo-500 text-white"><CheckCircle2 size={12}/></div>
-                <span className="font-bold text-indigo-300">Don't have an ad?</span>
-              </div>
-              <p className="text-sm text-gray-400">Our creative team can design a motion-graphic ad for your brand for a one-time fee of <strong>$150</strong>.</p>
-            </div>
-          </div>
-
-          <div className="relative">
+          <RevealOnScroll delay={200} className="relative">
              {/* Abstract Representation of Asset Upload */}
-             <div className="aspect-[9/16] max-w-xs mx-auto bg-gray-900 rounded-3xl border border-white/10 relative overflow-hidden shadow-2xl">
+             <div className="aspect-[9/16] max-w-[280px] mx-auto bg-gray-900 rounded-[2.5rem] border border-white/10 relative overflow-hidden shadow-2xl animate-float">
                 <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-px bg-gray-800/50 opacity-20">
                   <div></div><div></div><div></div><div></div>
                 </div>
                 
                 {/* Upload UI Element */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
-                  <div className="w-20 h-20 rounded-full bg-gray-800 border border-dashed border-gray-600 flex items-center justify-center mb-6 animate-pulse">
-                    <Upload size={32} className="text-gray-400" />
+                  <div className="w-24 h-24 rounded-full bg-gray-800/80 border-2 border-dashed border-gray-600 flex items-center justify-center mb-6 group cursor-pointer hover:border-indigo-500 hover:bg-indigo-500/10 transition-all duration-300">
+                    <Upload size={32} className="text-gray-400 group-hover:text-indigo-400 animate-bounce" />
                   </div>
                   <h3 className="text-white font-bold text-xl mb-2">Drop Artwork Here</h3>
                   <p className="text-xs text-gray-500 mb-6">MP4, JPG, PNG accepted<br/>Max 50MB</p>
                   <div className="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-indigo-500 h-full w-2/3"></div>
+                    <div className="bg-gradient-to-r from-indigo-500 to-blue-500 h-full w-2/3 animate-pulse"></div>
                   </div>
                 </div>
 
                 {/* Simulated Success Notification */}
-                <div className="absolute top-6 left-6 right-6 p-3 bg-green-500/10 border border-green-500/20 backdrop-blur-md rounded-xl flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                <div className="absolute top-6 left-6 right-6 p-3 bg-green-500/10 border border-green-500/20 backdrop-blur-md rounded-xl flex items-center gap-3 animate-fade-in-down">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                   <span className="text-xs font-mono text-green-400">Spec Check Passed</span>
                 </div>
              </div>
-          </div>
+             
+             {/* Background glow for phone */}
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-indigo-500/10 blur-[60px] -z-10 rounded-full"></div>
+          </RevealOnScroll>
 
         </div>
       </div>
     </section>
 
     {/* Final CTA */}
-    <section className="py-20 text-center">
-       <h2 className="text-3xl font-bold mb-8">Start your campaign today.</h2>
-       <button className="px-10 py-5 rounded-full bg-white text-black font-bold text-lg hover:bg-gray-200 transition-all shadow-xl shadow-white/10">
+    <section className="py-20 text-center relative z-10">
+      <RevealOnScroll>
+       <h2 className="text-3xl md:text-5xl font-bold mb-8">Start your campaign today.</h2>
+       <button className="px-10 py-5 rounded-full bg-white text-black font-bold text-lg hover:bg-gray-200 transition-all shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:shadow-[0_0_50px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95">
           Book a Consultation
        </button>
+      </RevealOnScroll>
     </section>
   </div>
 );
@@ -460,8 +544,9 @@ const App = () => {
       
       {/* Background Ambient Glows */}
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-blue-600/10 rounded-full blur-[120px]"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[70vw] h-[70vw] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse-slow"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] bg-blue-600/10 rounded-full blur-[120px] animation-delay-2000"></div>
+        <div className="absolute top-[40%] left-[30%] w-[40vw] h-[40vw] bg-purple-600/5 rounded-full blur-[100px] animate-pulse-slow animation-delay-4000"></div>
       </div>
 
       <Navbar 
@@ -483,13 +568,20 @@ const App = () => {
       <Footer />
       
       <style jsx global>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-15px); }
+        }
         @keyframes fade-in-up {
-          from { opacity: 0; transform: translateY(20px); }
+          from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
         }
         @keyframes fade-in-down {
           from { opacity: 0; transform: translateY(-10px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
         }
         .animate-fade-in-up {
           animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -500,9 +592,13 @@ const App = () => {
         .animate-pulse-slow {
           animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
       `}</style>
     </div>
   );
 };
-
-export default App;
